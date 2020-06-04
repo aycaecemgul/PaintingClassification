@@ -1,15 +1,25 @@
 import keras
 import tensorflow as tf
+import keras.layers.normalization
+from keras_preprocessing.image import ImageDataGenerator
+from sklearn.model_selection import train_test_split
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Conv2D,MaxPooling2D,Activation,Flatten,Dense
+from tensorflow.keras.callbacks import TensorBoard
+
 import matplotlib.pyplot as plt
 import numpy as np
 import os
 import cv2
 import pickle
 import random
+import sklearn
+from tensorflow.python.keras import regularizers
+from tensorflow.python.keras.layers import Dropout
+from tensorflow.python.layers.normalization import BatchNormalization
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+
 # DIR = 'C:\\Users\\aycae\\PycharmProjects\\AI\\best-artworks-of-all-time'
 # CATEGORIES = ["Edgar_Degas","Pablo_Picasso","Vincent_van_Gogh"]
 # training_data=[]
@@ -45,30 +55,59 @@ os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 # pickle_out = open("y.pickle","wb")
 # pickle.dump(y, pickle_out)
 # pickle_out.close()
-
+#
 pickle_in = open("X.pickle","rb")
 X = pickle.load(pickle_in)
 
 pickle_in = open("y.pickle","rb")
 y = pickle.load(pickle_in)
 
-X=X/255.0
-model=tf.keras.models.Sequential()
-model.add(Conv2D(64,(3,3),input_shape=X.shape[1:]))
-model.add(Activation("relu"))
-model.add(MaxPooling2D(pool_size=(2,2)))
-
-model.add(tf.keras.layers.Flatten())
-model.add(tf.keras.layers.Dense(128,activation=tf.nn.relu))
-model.add(tf.keras.layers.Dense(10,activation=tf.nn.softmax))
-
-model.compile(optimizer="adam",loss="sparse_categorical_crossentropy",metrics=["accuracy"])
-model.fit(X,y,batch_size=32,validation_split=0.3,epochs=5)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33,shuffle= False)
 
 
+# X=X/255.0
+#
+# model=tf.keras.models.Sequential()
+#
+# model.add(Conv2D(64, (3, 3),input_shape=X.shape[1:],activation=tf.nn.relu))
+# model.add(MaxPooling2D(pool_size=(2, 2)))
+#
+# model.add(Conv2D(32, (3, 3),input_shape=X.shape[1:],activation=tf.nn.relu))
+# model.add(MaxPooling2D(pool_size=(2, 2)))
+#
+# model.add(Conv2D(16, (3, 3),activation=tf.nn.relu))
+# model.add(MaxPooling2D(pool_size=(2, 2)))
+#
+#
+# model.add(Flatten())
+# model.add(Dense(16,activation=tf.nn.relu))
+# model.add(Flatten())
+# model.add(Dense(10,activation=tf.nn.softmax))
+#
+#
+# model.compile(optimizer="adam",loss="sparse_categorical_crossentropy",metrics=["accuracy"])
+#
+# aug = ImageDataGenerator()
+# BS=32
+# model.fit(aug.flow(X_test, y_test, batch_size = BS),validation_data = (X_train, y_train), steps_per_epoch = 10,epochs =10)
+#
+# model.save("painting_classifier.model")
 
+the_model=tf.keras.models.load_model("painting_classifier.model")
 
+predict=the_model.predict([X_test])
 
+print("The prediction is:")
+p=np.argmax(predict[0])
+if p == 0:
+    print("Edgar Degas")
+elif p == 1:
+    print("Pablo Picasso")
+elif p == 2:
+    print("Vincent Van Gogh")
+else:
+    print("what")
 
-
+plt.imshow(cv2.cvtColor(X_test[0], cv2.COLOR_BGR2RGB))
+plt.show()
 
