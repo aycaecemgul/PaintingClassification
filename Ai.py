@@ -88,9 +88,8 @@ BS=32
 model.fit(aug.flow(X_test, y_test, batch_size = BS),validation_data = (X_train, y_train), steps_per_epoch = 20,epochs =10)
 
 model.save("painting_classifier.model")
-
 the_model=tf.keras.models.load_model("painting_classifier.model")
-
+the_model.summary()
 predict=the_model.predict([X_test])
 
 print("The prediction is:")
@@ -106,4 +105,3 @@ else:
 
 plt.imshow(cv2.cvtColor(X_test[15], cv2.COLOR_BGR2RGB))
 plt.show()
-
